@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo "importing standard includes..."
+cp -R ~/latex/std/. ~/latex/$1/
+cd ~/latex/$1
+
+# kör latexmk, och redirecta all non-error output
+latexmk -bibtex -pdf main.tex -silent -shell-escape 1> /dev/null
+echo "latexmk process done."
+mv main.pdf $1.pdf

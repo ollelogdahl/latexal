@@ -1,0 +1,91 @@
+#!/bin/bash
+
+STDPATH="D/LaTeX/std/"
+TEMPLATEPATH="D/LaTeX/templates"
+
+function updateServer {
+	scp ~/scripts/latexal_s $1:~/latex/ 1> /dev/null
+	ssh $1 "chmod u+x ~/latex/latexal_s"
+	echo " * server script updated"
+
+	scp -r ~/$STDPATH $1:~/latex/ 1> /dev/null
+	echo " * server standard includes updated"
+	echo ""
+}
+
+function buildC {
+	# testar så att filen finns
+	if test -f "$2"; then
+		echo "file $2 doesn't exist." 
+		return 1
+	fi
+
+	# 1: OLLES -------------------------------------------------
+	# skapar directory för projekt och kopierar över hela mappen
+	ssh $1 "mkdir ~/latex/$2"
+	scp -r $2 $1:~/latex/ 1> /dev/null
+
+	echo "project folder created: $1:~/latex/$2"
+
+	# 2: SERVER ------------------------------------------------
+	# ssh till hostnamn
+
+	echo " - server running"
+	# kör script
+	ssh $1 "~/latex/latexal_s $2"
+	echo " - server finished"
+
+	# 3: OLLES -------------------------------------------------
+	# hämta pdf från server
+	scp $1:~/latex/$2/$2.pdf . > /dev/null 2>&1
+
+	# om pdf inte finns, hämta log
+	if test -f "$2.pdf"; then
+		echo "Build succeded. $2.pdf fetched!"
+	else
+		echo "Failed build for $2.pdf. Fetching log..."
+		scp $1:~/latex/$2/main.log . 1> /dev/null
+	fi
+
+	# ta bort kopia på servern
+	ssh $1 "rm -r ~/latex/$2"
+	echo "removed serverside copy."
+
+	mv $2.pdf $2/$2.pdf
+
+	# output status
+	FILESIZE=$(ls -lah $2/$2.pdf | awk '{ print $5}')
+	echo "Build took $SECONDS seconds. [${FILESIZE}B]"
+
+}
+
+function newC {
+	template=$1
+	filename=$2
+
+	# find template in TEMPLATEPATH
+	tpath="${TEMPLATEPATH}/${template}.tex"
+	if test -f ~/"$tpath"; then
+		mkdir $filename
+		cp ~/$tpath $filename/main.tex
+		echo "Template copied!"
+	else
+		echo "$tpath"
+		echo "Template $template doesn't exist!"
+	fi
+}
+
+# MAIN PROGRAM
+echo "LaTeXal 0.12"
+echo " - github.com/ollelogdahl"
+echo ""
+
+cmd=$1
+# handle commands
+srv=$2
+dir=${3%/}
+case "$cmd" in
+	build)  buildC $srv $dir ;;			# runs build command on server
+	update) updateServer $srv ;;		# update server script and std/
+	new)    newC $2 $3 ;;						# creates a new .tex file from a template
+esac
