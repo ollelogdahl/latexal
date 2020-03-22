@@ -81,8 +81,18 @@ function newC {
 	fi
 }
 
+function helpC {
+	echo "Usage: latexal <command> <parameters>"
+	echo "   build <hostname> <directory>"
+	echo "          Copies project directory to host and compiles it."
+	echo "   update <hostname>"
+	echo "          Updates serverscript and std includes."
+	echo "   new <template> <name>"
+	echo "          Creates a new project directory, copying an existing template."
+}
+
 # MAIN PROGRAM
-echo "LaTeXal 0.12"
+echo "LaTeXal 0.14"
 echo " - github.com/ollelogdahl"
 echo ""
 
@@ -96,4 +106,6 @@ case "$cmd" in
 	build)  buildC $srv $dir ;;			# runs build command on server
 	update) updateServer $srv ;;		# update server script and std/
 	new)    newC $2 $3 ;;						# creates a new .tex file from a template
+	help)   helpC ;;
+	*) { echo "Invalid Command!" && helpC; } ;;
 esac
