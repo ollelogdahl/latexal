@@ -14,49 +14,55 @@ function updateServer {
 }
 
 function buildC {
-	# testar så att filen finns
-	if test -f "$2"; then
-		echo "file $2 doesn't exist." 
-		return 1
-	fi
+	# Handle func inputs ---------------------------------------------------------
+	name=""
+	dir=""
+	[ $2 = "." ] &&
+		{ name=${PWD##*/} && dir="${PWD}";       } ||
+		{ name=$2         && dir="${PWD}/$name"; }
 
-	# 1: OLLES -------------------------------------------------
+	# test if directory exists, if not: exit
+	[ -d $dir ] || { echo "Directory $name doesn't exist" && return 1; }
+
+	# Init -----------------------------------------------------------------------
 	# skapar directory för projekt och kopierar över hela mappen
-	ssh $1 "mkdir ~/latex/$2"
-	scp -r $2 $1:~/latex/ 1> /dev/null
+	ssh $1 "mkdir ~/latex/$name" &> /dev/null || :
+	scp -r $dir $1:~/latex/ 1> /dev/null
 
-	echo "project folder created: $1:~/latex/$2"
+	echo "project folder copied: $1:~/latex/$name"
 
-	# 2: SERVER ------------------------------------------------
+	# Run server -----------------------------------------------------------------
 	# ssh till hostnamn
 
-	echo " - server running"
-	# kör script
-	ssh $1 "~/latex/latexal_s $2"
-	echo " - server finished"
+	# run serverside script
+	ssh $1 "~/latex/latexal_s $name"
 
-	# 3: OLLES -------------------------------------------------
-	# hämta pdf från server
-	scp $1:~/latex/$2/$2.pdf . > /dev/null 2>&1
+	# Fetching -------------------------------------------------------------------
+	# collect pdf from server
+	scp $1:~/latex/$name/main.pdf $dir > /dev/null 2>&1 || :
+
+	success=0
+	[ -f "$dir/main.pdf" ] && success=1
 
 	# om pdf inte finns, hämta log
-	if test -f "$2.pdf"; then
-		echo "Build succeded. $2.pdf fetched!"
+	if [ $success -eq 1 ]; then
+		echo "Build succeded. $name.pdf fetched!"
 	else
-		echo "Failed build for $2.pdf. Fetching log..."
-		scp $1:~/latex/$2/main.log . 1> /dev/null
+		echo "Failed build for $name.pdf. Fetching log..."
+		scp $1:~/latex/$name/main.log . 1> /dev/null
 	fi
 
+	# Cleanup --------------------------------------------------------------------
 	# ta bort kopia på servern
-	ssh $1 "rm -r ~/latex/$2"
-	echo "removed serverside copy."
-
-	mv $2.pdf $2/$2.pdf
+	ssh $1 "rm -r ~/latex/$name"
 
 	# output status
-	FILESIZE=$(ls -lah $2/$2.pdf | awk '{ print $5}')
-	echo "Build took $SECONDS seconds. [${FILESIZE}B]"
+	if [ $success -eq 1 ]; then
+		mv $dir/main.pdf $dir/$name.pdf
 
+		FILESIZE=$(ls -lah $dir/$name.pdf | awk '{ print $5}')
+		echo "Build took $SECONDS seconds. [${FILESIZE}B]"
+	fi
 }
 
 function newC {
@@ -79,6 +85,8 @@ function newC {
 echo "LaTeXal 0.12"
 echo " - github.com/ollelogdahl"
 echo ""
+
+set -e
 
 cmd=$1
 # handle commands
