@@ -35,6 +35,8 @@ function buildC {
 	# ssh till hostnamn
 
 	# run serverside script
+	now=${date +"%T"}
+	echo "[ $now Latexal started]"
 	ssh $1 "~/latex/latexal_s $name"
 
 	# Fetching -------------------------------------------------------------------
