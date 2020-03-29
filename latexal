@@ -2,9 +2,11 @@
 
 STDPATH="D/LaTeX/std/"
 TEMPLATEPATH="D/LaTeX/templates"
+SSCRIPTPATH="~/scripts/"
 
 function updateServer {
-	scp ~/scripts/latexal_s $1:~/latex/ 1> /dev/null
+	ssh $1 "mkdir ~/latex" &> /dev/null
+	scp $SSCRIPTPATH/latexal_s $1:~/latex/ 1> /dev/null
 	ssh $1 "chmod u+x ~/latex/latexal_s"
 	echo " * server script updated"
 
@@ -35,8 +37,6 @@ function buildC {
 	# ssh till hostnamn
 
 	# run serverside script
-	now=${date +"%T"}
-	echo "[ $now Latexal started]"
 	ssh $1 "~/latex/latexal_s $name"
 
 	# Fetching -------------------------------------------------------------------
@@ -51,20 +51,21 @@ function buildC {
 		echo "Build succeded. $name.pdf fetched!"
 	else
 		echo "Failed build for $name.pdf. Fetching log..."
-		scp $1:~/latex/$name/main.log . 1> /dev/null
+		scp $1:~/latex/$name/main.log $dir 1> /dev/null
 	fi
 
 	# Cleanup --------------------------------------------------------------------
-	# ta bort kopia på servern
-	ssh $1 "rm -r ~/latex/$name"
-
 	# output status
 	if [ $success -eq 1 ]; then
 		mv $dir/main.pdf $dir/$name.pdf
-
+		WORDS=$(pdftotext $dir/$name.pdf - | egrep -e '\w\w\w+' | wc -w)
 		FILESIZE=$(ls -lah $dir/$name.pdf | awk '{ print $5}')
-		echo "Build took $SECONDS seconds. [${FILESIZE}B]"
+		echo "Build took $SECONDS seconds. [${FILESIZE}B, ${WORDS} words]"
 	fi
+
+	# ta bort kopia på servern
+	ssh $1 "rm -r ~/latex/$name"
+
 }
 
 function newC {
@@ -94,7 +95,7 @@ function helpC {
 }
 
 # MAIN PROGRAM
-echo "LaTeXal 0.14"
+echo "LaTeXal 0.15"
 echo " - github.com/ollelogdahl"
 echo ""
 
