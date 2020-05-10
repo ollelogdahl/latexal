@@ -2,11 +2,9 @@
 
 STDPATH="D/LaTeX/std/"
 TEMPLATEPATH="D/LaTeX/templates"
-SSCRIPTPATH="~/scripts/"
 
 function updateServer {
-	ssh $1 "mkdir ~/latex" &> /dev/null
-	scp $SSCRIPTPATH/latexal_s $1:~/latex/ 1> /dev/null
+	scp ~/scripts/latexal_s $1:~/latex/ &> /dev/null
 	ssh $1 "chmod u+x ~/latex/latexal_s"
 	echo " * server script updated"
 
@@ -60,7 +58,8 @@ function buildC {
 		mv $dir/main.pdf $dir/$name.pdf
 		WORDS=$(pdftotext $dir/$name.pdf - | egrep -e '\w\w\w+' | wc -w)
 		FILESIZE=$(ls -lah $dir/$name.pdf | awk '{ print $5}')
-		echo "Build took $SECONDS seconds. [${FILESIZE}B, ${WORDS} words]"
+		VICOUNTER=$(pdftotext $dir/$name.pdf - | grep -i 'vi ' | wc -l)
+		echo "Build took $SECONDS seconds. [${FILESIZE}B, ${WORDS} words, ${VICOUNTER} VI]"
 	fi
 
 	# ta bort kopia på servern

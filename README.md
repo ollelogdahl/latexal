@@ -1,6 +1,10 @@
 # latexal
 ### A LaTeX tool for copiling remotely
+<<<<<<< HEAD
 Olle Logdahl, 10 March 2020
+=======
+Olle Logdahl, 21 March 2029
+>>>>>>> 2d3085ca4904782b833519e1eda7a5147c948033
 
 ---
 **latexal** is a bash script for remotely compiling LaTeX documents.

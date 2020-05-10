@@ -9,6 +9,9 @@ echo ""
 # kör latexmk, och redirecta all non-error output
 latexmk -bibtex -pdf main.tex -silent -shell-escape 1> /dev/null
 
+#latexmk -bibtex -silent -shell-escape -pdf -pdflatex="pdflatex %O '\PassOptionsToPackage{draft}{graphicx}\input{%S}'" main.tex 1> /dev/null
+#latexmk -bibtex -silent -shell-escape -pdf -g main.tex 1> /dev/null
+
 lxmke=$?
 [ $lxmke -eq 0 ] || { echo "Latexmk: exitcode $lxmke" && rm main.pdf; }
 
