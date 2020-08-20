@@ -1,19 +1,21 @@
 #!/bin/bash
 
-STDPATH="D/LaTeX/std/"
-TEMPLATEPATH="D/LaTeX/templates"
+STDPATH="~/Documents/latexstd/"
+SERVERSCRIPTPATH="~/Documents/bash/latexal/latexal_s"
 
 function updateServer {
-	scp ~/scripts/latexal_s $1:~/latex/ &> /dev/null
+	ssh $1 "mkdir -p ~/latex"
+	scp $SERVERSCRIPTPATH $1:~/latex/
 	ssh $1 "chmod u+x ~/latex/latexal_s"
 	echo " * server script updated"
 
-	scp -r ~/$STDPATH $1:~/latex/ 1> /dev/null
+	scp -r $STDPATH $1:~/latex/ 1> /dev/null
 	echo " * server standard includes updated"
 	echo ""
 }
 
 function buildC {
+	set -e
 	# Handle func inputs ---------------------------------------------------------
 	name=""
 	dir=""
@@ -39,7 +41,7 @@ function buildC {
 
 	# Fetching -------------------------------------------------------------------
 	# collect pdf from server
-	scp $1:~/latex/$name/main.pdf $dir > /dev/null 2>&1 || :
+	scp $1:~/latex/$name/main.pdf $dir &> /dev/null || :
 
 	success=0
 	[ -f "$dir/main.pdf" ] && success=1
@@ -67,38 +69,19 @@ function buildC {
 
 }
 
-function newC {
-	template=$1
-	filename=$2
-
-	# find template in TEMPLATEPATH
-	tpath="${TEMPLATEPATH}/${template}.tex"
-	if test -f ~/"$tpath"; then
-		mkdir $filename
-		cp ~/$tpath $filename/main.tex
-		echo "Template copied!"
-	else
-		echo "$tpath"
-		echo "Template $template doesn't exist!"
-	fi
-}
-
 function helpC {
 	echo "Usage: latexal <command> <parameters>"
 	echo "   build <hostname> <directory>"
 	echo "          Copies project directory to host and compiles it."
+	echo "		Project directory assumed to have a main.tex file."
 	echo "   update <hostname>"
 	echo "          Updates serverscript and std includes."
-	echo "   new <template> <name>"
-	echo "          Creates a new project directory, copying an existing template."
 }
 
 # MAIN PROGRAM
 echo "LaTeXal 0.15"
 echo " - github.com/ollelogdahl"
 echo ""
-
-set -e
 
 cmd=$1
 # handle commands
@@ -107,7 +90,6 @@ dir=${3%/}
 case "$cmd" in
 	build)  buildC $srv $dir ;;			# runs build command on server
 	update) updateServer $srv ;;		# update server script and std/
-	new)    newC $2 $3 ;;						# creates a new .tex file from a template
 	help)   helpC ;;
 	*) { echo "Invalid Command!" && helpC; } ;;
 esac
