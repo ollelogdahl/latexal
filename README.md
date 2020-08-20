@@ -3,7 +3,6 @@
 Olle Logdahl, 10 March 2020
 
 [![made-with-bash](https://img.shields.io/badge/Made%20with-Bash-1f425f.svg)](https://www.gnu.org/software/bash/)
-![downloads](https://img.shields.io/github/downloads/ollelogdahl/latexal/total)
 ![licence](https://img.shields.io/github/license/ollelogdahl/latexal)
 ![issues](https://img.shields.io/github/issues-raw/ollelogdahl/latexal)
 
