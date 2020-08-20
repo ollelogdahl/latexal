@@ -22,8 +22,7 @@ After installation, run
 `latexal update <hostname>` to update remote with remoteside script.
 
 ### Constants may be modified!
-- `$STDPATH` equal standard include folder
-- `$SSCRIPTPATH` equal to 
+- `$STDPATH` points to standard include folder. All files in this directory will be copied to remote on `latexal update`, and used everytime a project is built.
 
 ## Usage
 
