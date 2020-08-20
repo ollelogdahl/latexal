@@ -1,13 +1,10 @@
 # latexal
 ### A LaTeX tool for copiling remotely
-<<<<<<< HEAD
 Olle Logdahl, 10 March 2020
-=======
-Olle Logdahl, 21 March 2029
->>>>>>> 2d3085ca4904782b833519e1eda7a5147c948033
-
 ---
 **latexal** is a bash script for remotely compiling LaTeX documents.
+
+The script comes packaged along with **latexal_s**. This is the serverside, and is to be installed on server.
 
 ## Usage
 
@@ -17,6 +14,8 @@ Olle Logdahl, 21 March 2029
 
 ## Installation
 
+Move **latexal_s** to the server, making sure the root is a part of ´´´$PATH´´´.
+
 Modify constants in latexal script:
-´´´STDPATH´´´ equal standard include folder
-´´´SSCRIPTPATH´´´ equal to 
+- ´´´$STDPATH´´´ equal standard include folder
+- ´´´$SSCRIPTPATH´´´ equal to 
