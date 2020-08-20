@@ -26,6 +26,6 @@ After installation, run
 
 ## Usage
 
-**latexal update hostname** for updating remote with std/ resources.
+`latexal update <hostname>` for updating remote with std/ resources.
 
-**latexal build hostname filename** for building project.
+`latexal build <hostname> <filename>` for building project.
