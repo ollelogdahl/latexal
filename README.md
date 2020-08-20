@@ -28,3 +28,7 @@ After installation, run
 `latexal update <hostname>` for updating remote with std/ resources.
 
 `latexal build <hostname> <filename>` for building project.
+
+## Licensing
+
+This project, and all code it contains, is licensed under *The Unlicense* and can be read [here](UNLICENSE).
